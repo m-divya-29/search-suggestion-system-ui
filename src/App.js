@@ -2,10 +2,13 @@ import React, { useState, useEffect } from "react";
 
 function App() {
   const [product, setProduct] = useState("");
+  // suggestions: list of suggestions, setSuggestions: function to modify suggestions
   const [suggestions, setSuggestions] = useState([]);
+  const [allSuggestions, setAllSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const BASE_URL = "https://search-suggestions-backend-mdmpir6dgq-uc.a.run.app";
+  // const BASE_URL = "http://localhost:8585";
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (product.trim() !== "") {
@@ -30,6 +33,23 @@ function App() {
     return () => clearTimeout(timeout);
   }, [product]);
 
+  // GET ALL
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      fetch(`${BASE_URL}/api/suggestion/`)
+        .then((res) => res.json())
+        .then((data) => {
+          setAllSuggestions(data);
+        })
+        .catch((err) => {
+          console.error(err);
+          setAllSuggestions([]);
+        });
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
   const handleSelect = (value) => {
     setProduct(value);
     setSuggestions([]);
@@ -41,7 +61,9 @@ function App() {
     return (
       <>
         {text.substring(0, index)}
-        <strong style={{ color: "#06b6d4" }}>{text.substring(index, index + product.length)}</strong>
+        <strong style={{ color: "#06b6d4" }}>
+          {text.substring(index, index + product.length)}
+        </strong>
         {text.substring(index + product.length)}
       </>
     );
@@ -56,96 +78,150 @@ function App() {
   };
 
   return (
-    <div style={{
-      backgroundColor: theme.background,
-      color: theme.color,
-      transition: "0.3s",
-      minHeight: "100vh",
-      padding: "2rem",
-      fontFamily: "Segoe UI, sans-serif",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-    }}>
-      <button
-        onClick={() => setDarkMode(!darkMode)}
+    <>
+      <div
         style={{
-          position: "absolute",
-          top: "1rem",
-          right: "1rem",
-          padding: "0.6rem 1rem",
-          borderRadius: "8px",
-          border: "none",
-          cursor: "pointer",
-          backgroundColor: "#06b6d4",
-          color: "#fff",
-          fontWeight: "bold",
-          boxShadow: "0 2px 6px rgba(0, 0, 0, 0.2)",
+          backgroundColor: theme.background,
+          color: theme.color,
+          transition: "0.3s",
+          padding: "2rem",
+          fontFamily: "Segoe UI, sans-serif",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
-        {darkMode ? "☀ Light" : "🌙 Dark"}
-      </button>
-
-      <h1 style={{ fontSize: "2rem", marginBottom: "1rem" }}>🔍 Smart Search</h1>
-
-      <div style={{ position: "relative", width: "100%", maxWidth: "400px" }}>
-        <input
-          type="text"
-          placeholder="Search for a product..."
-          value={product}
-          onChange={(e) => setProduct(e.target.value)}
+        <button
+          onClick={() => setDarkMode(!darkMode)}
           style={{
-            padding: "0.75rem 1rem",
-            width: "100%",
-            borderRadius: "12px",
-            border: "1px solid #ccc",
-            backgroundColor: theme.inputBackground,
-            color: theme.color,
-            fontSize: "1rem",
-            boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
-          }}
-        />
-
-        {loading && (
-          <div style={{ marginTop: "0.5rem", fontStyle: "italic", color: "#aaa" }}>
-            🔄 Loading...
-          </div>
-        )}
-
-        {suggestions.length > 0 && !loading && (
-          <ul style={{
-            listStyle: "none",
-            marginTop: "0.5rem",
-            padding: "0",
             position: "absolute",
-            width: "100%",
-            backgroundColor: theme.suggestionBg,
-            borderRadius: "10px",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-            zIndex: 1000,
-            overflow: "hidden",
-          }}>
-            {suggestions.map((sug, index) => (
-              <li
-                key={index}
-                onClick={() => handleSelect(sug)}
-                style={{
-                  padding: "0.75rem 1rem",
-                  borderBottom:
-                    index !== suggestions.length - 1 ? "1px solid #eee" : "none",
-                  cursor: "pointer",
-                  transition: "background 0.2s",
-                }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.suggestionHover}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.suggestionBg}
-              >
-                {highlightMatch(sug)}
-              </li>
-            ))}
-          </ul>
-        )}
+            top: "1rem",
+            right: "1rem",
+            padding: "0.6rem 1rem",
+            borderRadius: "8px",
+            border: "none",
+            cursor: "pointer",
+            backgroundColor: "#06b6d4",
+            color: "#fff",
+            fontWeight: "bold",
+            boxShadow: "0 2px 6px rgba(0, 0, 0, 0.2)",
+          }}
+        >
+          {darkMode ? "☀ Light" : "🌙 Dark"}
+        </button>
+
+        <h1 style={{ fontSize: "2rem", marginBottom: "1rem" }}>
+          🔍 Smart Search
+        </h1>
+
+        <div style={{ position: "relative", width: "100%", maxWidth: "400px" }}>
+          <input
+            type="text"
+            placeholder="Search for a product..."
+            value={product}
+            onChange={(e) => setProduct(e.target.value)}
+            style={{
+              padding: "0.75rem 1rem",
+              width: "100%",
+              borderRadius: "12px",
+              border: "1px solid #ccc",
+              backgroundColor: theme.inputBackground,
+              color: theme.color,
+              fontSize: "1rem",
+              boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
+            }}
+          />
+
+          {loading && (
+            <div
+              style={{
+                marginTop: "0.5rem",
+                fontStyle: "italic",
+                color: "#aaa",
+              }}
+            >
+              🔄 Loading...
+            </div>
+          )}
+
+          {suggestions.length > 0 && !loading && (
+            <ul
+              style={{
+                listStyle: "none",
+                marginTop: "0.5rem",
+                padding: "0",
+                position: "absolute",
+                width: "100%",
+                backgroundColor: theme.suggestionBg,
+                borderRadius: "10px",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                zIndex: 1000,
+                overflow: "hidden",
+              }}
+            >
+              {suggestions.map((sug, index) => (
+                <li
+                  key={index}
+                  onClick={() => handleSelect(sug)}
+                  style={{
+                    padding: "0.75rem 1rem",
+                    borderBottom:
+                      index !== suggestions.length - 1
+                        ? "1px solid #eee"
+                        : "none",
+                    cursor: "pointer",
+                    transition: "background 0.2s",
+                  }}
+                  onMouseOver={(e) =>
+                    (e.currentTarget.style.backgroundColor =
+                      theme.suggestionHover)
+                  }
+                  onMouseOut={(e) =>
+                    (e.currentTarget.style.backgroundColor = theme.suggestionBg)
+                  }
+                >
+                  {highlightMatch(sug)}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
-    </div>
+      <>
+        <div
+          style={{
+            position: "fixed",
+            bottom: "0",
+            margin: "80px",
+          }}
+        >
+          <div>
+            Products available in my fake store: {`{${allSuggestions.length}}`}
+          </div>
+          {allSuggestions.map((sug, index) => (
+            <span
+              key={index}
+              onClick={() => handleSelect(sug)}
+              style={{
+                //backgroundColor: "#e0f0ff",
+                color: "#0366d6",
+                padding: "6px 6px",
+                borderRadius: "15px",
+                fontSize: "13px",
+                //fontWeight: "500",
+                display: "inline-block",
+                margin: "5px",
+                cursor: "pointer",
+                border: "1px",
+                borderStyle: "dotted"
+              }}
+            >
+              {highlightMatch(sug)}
+            </span>
+          ))}
+        </div>
+      </>
+    </>
   );
 }
 

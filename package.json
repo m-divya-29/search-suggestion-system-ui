@@ -2,8 +2,7 @@
   "name": "search-suggestion-system-ui",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://m-divya-29.github.io/search-suggestion-system",
-
+  "homepage": "https://m-divya-29.github.io/search-suggestion-system-ui",
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
