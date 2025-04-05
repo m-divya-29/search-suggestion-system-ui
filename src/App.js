@@ -213,7 +213,7 @@ function App() {
                 margin: "5px",
                 cursor: "pointer",
                 border: "1px",
-                borderStyle: "dotted"
+                borderStyle: "dotted",
               }}
             >
               {highlightMatch(sug)}
